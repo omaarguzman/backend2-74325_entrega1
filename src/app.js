@@ -15,6 +15,9 @@ const io = new Server(httpServer);
 
 const productManager = new ProductManager(path.join(__dirname, 'data', 'products.json'));
 
+const connectDB = require('./db');
+connectDB();
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
