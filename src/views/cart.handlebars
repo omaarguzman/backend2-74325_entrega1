@@ -1,0 +1,63 @@
+<h1>Carrito {{cartId}}</h1>
+
+{{#if items.length}}
+  <table role="grid">
+    <thead>
+      <tr>
+        <th>Producto</th>
+        <th>Precio</th>
+        <th>Cantidad</th>
+        <th>Subtotal</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {{#each items}}
+        <tr data-pid="{{this._id}}">
+          <td><a href="/products/{{this._id}}">{{this.title}}</a></td>
+          <td>{{money this.price}}</td>
+          <td>
+            <input class="qty" type="number" min="1" value="{{this.quantity}}" style="width:6rem">
+            <button class="update-item" data-pid="{{this._id}}">Actualizar</button>
+          </td>
+          <td>{{money this.subtotal}}</td>
+          <td><button class="remove-item" data-pid="{{this._id}}">Quitar</button></td>
+        </tr>
+      {{/each}}
+    </tbody>
+  </table>
+
+  <h3>Total: {{money total}}</h3>
+  <button id="empty-cart" data-cid="{{cartId}}" class="secondary">Vaciar carrito</button>
+{{else}}
+  <p>Tu carrito está vacío.</p>
+{{/if}}
+
+<p><a href="/products">← Seguir comprando</a></p>
+
+<script>
+  // Cart page interactions call endpoints
+  document.addEventListener('click', async (e) => {
+    const cid = '{{cartId}}';
+    if (e.target.classList.contains('remove-item')) {
+      const pid = e.target.dataset.pid;
+      await fetch(`/api/carts/${cid}/products/${pid}`, { method: 'DELETE' });
+      location.reload();
+    }
+    if (e.target.id === 'empty-cart') {
+      await fetch(`/api/carts/${cid}`, { method: 'DELETE' });
+      location.reload();
+    }
+    if (e.target.classList.contains('update-item')) {
+      const pid = e.target.dataset.pid;
+      const tr = e.target.closest('tr');
+      const qty = tr.querySelector('.qty').value;
+      await fetch(`/api/carts/${cid}/products/${pid}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ quantity: Number(qty) })
+      });
+      location.reload();
+    }
+  });
+</script>

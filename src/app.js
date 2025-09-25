@@ -3,57 +3,51 @@ const { createServer } = require('http');
 const { Server } = require('socket.io');
 const exphbs = require('express-handlebars');
 const path = require('path');
+const dotenv = require('dotenv');
 
-const productsRouter = require('./routes/products.router');
-const cartsRouter = require('./routes/carts.router');
+const connectDB = require('./db');
+const productsApiRouter = require('./routes/products.router');
+const cartsApiRouter = require('./routes/carts.router');
 const viewsRouter = require('./routes/views.router');
-const ProductManager = require('./managers/ProductManager');
+
+dotenv.config();
+connectDB();
 
 const app = express();
 const httpServer = createServer(app);
 const io = new Server(httpServer);
 
-const productManager = new ProductManager(path.join(__dirname, 'data', 'products.json'));
-
-const connectDB = require('./db');
-connectDB();
-
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.engine('handlebars', exphbs.engine());
+const hbs = exphbs.create({
+  helpers: {
+    eq: (a, b) => String(a) === String(b),
+    not: (v) => !v,
+    add: (a, b) => Number(a) + Number(b),
+    minus: (a, b) => Number(a) - Number(b),
+    money: (v) => (Number(v) || 0).toLocaleString('es-MX', { style: 'currency', currency: 'MXN' }),
+    json: (ctx) => JSON.stringify(ctx),
+    pageLink: (base, page, qs) => {
+      const params = new URLSearchParams(qs || {});
+      params.set('page', page);
+      return `${base}?${params.toString()}`;
+    }
+  }
+});
+app.engine('handlebars', hbs.engine);
 app.set('view engine', 'handlebars');
 app.set('views', path.join(__dirname, 'views'));
 
-app.use('/api/products', productsRouter(io, productManager)); 
-app.use('/api/carts', cartsRouter);
-app.use('/', viewsRouter(productManager));
+app.use('/api/products', productsApiRouter);
+app.use('/api/carts', cartsApiRouter);
 
-io.on('connection', async (socket) => {
-  console.log('Cliente conectado');
+app.use('/', viewsRouter);
 
-  const products = await productManager.getAll();
-  socket.emit('products', products);
+app.get('/health', (_, res) => res.json({ ok: true }));
 
-  socket.on('newProduct', async (productData) => {
-    await productManager.addProduct(productData);
-    const updatedList = await productManager.getAll();
-    io.emit('products', updatedList);
-  });
-
-  socket.on('deleteProduct', async (id) => {
-    await productManager.deleteProduct(id);
-    const updatedList = await productManager.getAll();
-    io.emit('products', updatedList);
-  });
-
-  socket.on('disconnect', () => {
-    console.log('Cliente desconectado');
-  });
-});
-
-const PORT = 8080;
+const PORT = process.env.PORT || 8080;
 httpServer.listen(PORT, () => {
-  console.log(`Servidor escuchando en http://localhost:${PORT}`);
+  console.log(`Server on http://localhost:${PORT}`);
 });

@@ -1,0 +1,22 @@
+<article>
+  <header>
+    <h1>{{product.title}}</h1>
+  </header>
+  <p>{{product.description}}</p>
+  <p><strong>Precio:</strong> {{money product.price}}</p>
+  <p><strong>Categoría:</strong> {{product.category}} · <strong>Stock:</strong> {{product.stock}}</p>
+
+  {{#if product.thumbnails.length}}
+    <details>
+      <summary>Imágenes</summary>
+      <div class="grid">
+        {{#each product.thumbnails}}
+          <img src="{{this}}" alt="thumb" style="max-width:100%;height:auto;">
+        {{/each}}
+      </div>
+    </details>
+  {{/if}}
+
+  <button class="add-to-cart" data-pid="{{product._id}}">Agregar al carrito</button>
+  <p><a href="/products">← Volver</a></p>
+</article>

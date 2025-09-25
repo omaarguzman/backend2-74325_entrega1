@@ -1,11 +1,28 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mi Comercio</title>
+  <meta charset="utf-8" />
+  <title>{{#if viewTitle}}{{viewTitle}} · {{/if}}Ecommerce</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
 </head>
 <body>
+  <nav class="container-fluid">
+    <ul>
+      <li><strong>Ecommerce</strong></li>
+    </ul>
+    <ul>
+      <li><a href="/products">Productos</a></li>
+      <li><a href="/realtimeproducts">Tiempo real</a></li>
+      <li><a href="#" id="goToCart">Mi carrito</a></li>
+    </ul>
+  </nav>
+
+  <main class="container">
     {{{body}}}
+  </main>
+
+  <script src="/js/cart.js"></script>
 </body>
 </html>

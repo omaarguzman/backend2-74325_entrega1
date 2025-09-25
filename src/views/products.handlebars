@@ -1,0 +1,61 @@
+<h1>Productos</h1>
+
+<form method="get" action="/products">
+  <div class="grid">
+    <div>
+      <label>Cantidad por página
+        <input type="number" name="limit" min="1" value="{{qs.limit}}">
+      </label>
+    </div>
+    <div>
+      <label>Orden por precio
+        <select name="sort">
+          <option value="" {{#if (eq qs.sort "")}}selected{{/if}}>—</option>
+          <option value="asc" {{#if (eq qs.sort "asc")}}selected{{/if}}>Asc</option>
+          <option value="desc" {{#if (eq qs.sort "desc")}}selected{{/if}}>Desc</option>
+        </select>
+      </label>
+    </div>
+    <div>
+      <label>Filtro
+        <input name="query" placeholder="category:Periféricos | status:true | texto"
+               value="{{qs.query}}">
+      </label>
+    </div>
+    <div class="align-end">
+      <button type="submit">Aplicar</button>
+      <a href="/products" role="button" class="secondary">Limpiar</a>
+    </div>
+  </div>
+</form>
+
+<article>
+  <div class="grid">
+    {{#each products}}
+      <div>
+        <h3><a href="/products/{{this._id}}">{{this.title}}</a></h3>
+        <p>{{this.description}}</p>
+        <p><strong>{{money this.price}}</strong> · Stock: {{this.stock}} · Cat: {{this.category}}</p>
+        <button class="add-to-cart" data-pid="{{this._id}}">Agregar al carrito</button>
+      </div>
+    {{/each}}
+  </div>
+</article>
+
+<nav aria-label="pagination">
+  <ul>
+    {{#if pagination.hasPrevPage}}
+      <li><a href="{{pageLink '/products' pagination.prevPage qs}}">« Anterior</a></li>
+    {{else}}
+      <li class="disabled"><a href="#">« Anterior</a></li>
+    {{/if}}
+
+    <li>página {{pagination.page}} / {{pagination.totalPages}}</li>
+
+    {{#if pagination.hasNextPage}}
+      <li><a href="{{pageLink '/products' pagination.nextPage qs}}">Siguiente »</a></li>
+    {{else}}
+      <li class="disabled"><a href="#">Siguiente »</a></li>
+    {{/if}}
+  </ul>
+</nav>
