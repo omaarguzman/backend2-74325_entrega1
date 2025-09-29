@@ -4,6 +4,9 @@ const { Server } = require('socket.io');
 const exphbs = require('express-handlebars');
 const path = require('path');
 const dotenv = require('dotenv');
+const { initializePassport, passport } = require('./passport');
+const sessionsRouter = require('./routes/sessions.router');
+const usersRouter = require('./routes/users.router');
 
 const connectDB = require('./db');
 const productsApiRouter = require('./routes/products.router');
@@ -17,9 +20,15 @@ const app = express();
 const httpServer = createServer(app);
 const io = new Server(httpServer);
 
+initializePassport();
+app.use(passport.initialize());
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
+
+app.use('/api/sessions', sessionsRouter);
+app.use('/api/users', usersRouter);
 
 const hbs = exphbs.create({
   helpers: {
